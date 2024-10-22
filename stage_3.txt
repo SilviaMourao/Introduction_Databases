@@ -1,0 +1,75 @@
+-- IBD 2021/2022
+-- Trabalho Realizado por:
+-- Grupo 22
+-- Ana Nunes, Mario Rui, Sílvia Mourão
+-- Horas de Trabalho: (4h30 em sala de aula + fizemos 2 alineas em casa cada um, demorei +-1h30, nao sei qt tempo demoraram?)
+
+-- Solução 1
+
+SELECT DISTINCT u.nin, u.name, a.data, c.sport
+FROM User u, Attend a, Class c
+WHERE c.id = a.class AND u.nin=a.user AND a.data LIKE '2020%'
+ORDER BY c.sport ASC, u.name ASC, u.nin ASC, a.data DESC;
+
+
+-- Solução 2
+
+SELECT DISTINCT c.sport, c.space
+FROM User u, Attend a, Class c 
+WHERE u.nin=a.user AND c.id=a.class AND (c.weekday LIKE 'SUN'  OR (u.gender LIKE 'F' AND YEAR(u.birthdate) >= 2001))
+
+-- Solução 3
+
+SELECT DISTINCT c1.weekday, c1.start_time, c1.end_time, c1.space, c1.sport
+FROM Class c1, User u2
+WHERE ((c1.start_time BETWEEN 13 AND 17) OR (c1.end_time BETWEEN 13 AND 17) ) 
+AND DATE_FORMAT(FROM_DAYS(DATEDIFF(now(),u2.birthdate)), '%Y') BETWEEN 17 AND 45 AND c1.ID IN (SELECT a.CLASS
+											       FROM Attend a
+											       WHERE MONTH (a.data) =01 AND YEAR(a.data) =2021)
+
+
+-- Solução 4
+SELECT u1.nin, u1.name, DATE_FORMAT(FROM_DAYS(DATEDIFF(now(),u1.birthdate)), '%Y')+0 AS Age
+FROM User u1
+WHERE u1.nin NOT IN (SELECT DISTINCT u.nin
+  			FROM User u, Attend a, Class c
+    			WHERE u.nin=a.user AND c.id=a.class AND c.start_time<13 AND c.sport LIKE 'Gymnastics')
+ORDER BY Age DESC
+
+
+-- Solução 5
+
+SELECT COUNT(DISTINCT a.data) AS nr_aulas_freq, c.sport, YEAR(a.data) AS Ano
+FROM Attend a, Class c 
+WHERE a.class=c.id 
+GROUP BY c.sport, Ano
+
+
+-- Solução 6
+
+SELECT DISTINCT u.nin, u.name, c.sport, YEAR(a.data) AS Ano , 10*COUNT(a.class) AS Total_pago
+FROM User u,  Class c, Attend a
+WHERE u.nin=a.user AND c.id=a.class
+GROUP BY a.user, c.sport,  Ano
+ORDER BY a.user ASC , c.sport ASC,  Ano DESC
+
+-- Solução 7
+
+SELECT u.nin, u.name, SUM(c.end_time-c.start_time) AS total_h
+FROM User u LEFT OUTER JOIN Attend a ON (u.nin=a.user) LEFT OUTER JOIN Class c ON (c.id=a.class)
+GROUP BY u.nin
+ORDER BY total_h DESC, u.name ASC, u.nin ASC 
+
+-- Solução 8
+
+SELECT YEAR(a.data) AS Ano, COUNT(a.user), u.nin, u.name, u.gender
+FROM Attend a, User u
+WHERE u.nin = a.user
+GROUP BY Ano, a.user, u.name, u.nin
+HAVING COUNT(a.user) >= ALL
+  (SELECT COUNT(a1.user)
+   FROM Attend a1
+   GROUP BY a1.user, YEAR(a1.data))
+ORDER BY Ano DESC, u.gender ASC, u.name ASC, u.nin ASC
+
+
