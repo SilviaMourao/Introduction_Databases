@@ -2,7 +2,7 @@
 
 **Institution**: Faculdade de Ciências da Universidade de Lisboa  
 **Course**: Introduction to Databases  
-**Project Date**: 2022  
+**Project Date**: 2021  
 **Project Language**: Portuguese  
 
 ## Table of Contents
